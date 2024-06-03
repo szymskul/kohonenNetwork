@@ -1,5 +1,8 @@
 from random import choice
 
+import numpy as np
+
+
 class Network:
     neurons: list
     data: list
@@ -8,22 +11,21 @@ class Network:
     m: int
     n: int
 
-    def __init__(self, m, n):
+    def __init__(self, m, n, input_size):
         self.N = 3
         self.m = m
         self.n = n
         self.alpha = 0.1
-        self.neurons = [[{
-            'x': 10 * i / (m - 1),
-            'y': 10 * j / (n - 1)}
-            for i in range(m)] for j in range(n)]
+        #self.neurons = [[np.array([10 * i / (m - 1), 10 * j / (n - 1)]) for i in range(m)] for j in range(n)]
+        self.neurons = [[np.random.rand(input_size) for _ in range(m)] for _ in range(n)]
 
     def Closest(self, point):
         minDist = 1e10
         closest = []
         for j, row in enumerate(self.neurons):
             for i, neuron in enumerate(row):
-                dist = ((neuron['x'] - point['x']) ** 2 + (neuron['y'] - point['y']) ** 2) ** 0.5
+                neuron = self.neurons[j][i]
+                dist = np.linalg.norm(neuron - point)
                 if dist < minDist:
                     minDist = dist
                     closest = [i, j, neuron]
@@ -38,16 +40,16 @@ class Network:
         i, j, _ = closest
 
         left = max(i - N, 0)
-        right = min(i + N, self.m) + 1
+        right = min(i + N, self.m - 1) + 1
         bottom = max(j - N, 0)
-        top = min(j + N, self.n) + 1
+        top = min(j + N, self.n - 1) + 1
 
-        for row in self.neurons[bottom:top]:
-            for neuron in row[left:right]:
-                neuron['x'] += alpha * (point['x'] - neuron['x'])
-                neuron['y'] += alpha * (point['y'] - neuron['y'])
+        for y in range(bottom, top):
+            for x in range(left, right):
+                self.neurons[y][x] += alpha * (point - self.neurons[y][x])
 
-    def Train(self, T):
+    def Train(self, T, data):
+        self.data = np.array(data)
         for epoch in range(T):
             self.Update(epoch, T)
 

@@ -24,16 +24,15 @@ scaler_data = scaler.fit_transform(X)
 data_list = [{'x': point[0], 'y': point[1]} for point in scaler_data]
 
 
-network = Network(5, 5)
-network.data = data_list
+network = Network(10, 10, 11)
 
 plot = Plot()
-plot.Scatter(data_list)
+plot.dataScatter(data_list)
 plot.Scatter(network.Unpack())
 plot.Show()
 
-network.Train(10000)
+network.Train(10000, scaler_data)
 
-plot.Scatter(data_list)
+plot.dataScatter(data_list)
 plot.Scatter(network.Unpack())
 plot.Show()
