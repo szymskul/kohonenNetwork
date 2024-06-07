@@ -28,17 +28,30 @@ X_processed = preprocessor.fit_transform(X)
 if isinstance(X_processed, pd.DataFrame):
     X_processed = X_processed.values
 
+Y_processed = []
+for i in range(len(Y)):
+    Y_processed.append(Y.iloc[i].tolist())
+
 som_size = (10, 10)
 input_len = X_processed.shape[1]
 learning_rate = 0.5
 sigma = 1.0
-numberOfEpochs = 5000
+numberOfEpochs = 1000
 
 scaler = MinMaxScaler()
 data = scaler.fit_transform(X_processed)
+positive_data = [0 for _ in range(21)]
+for i in range(len(Y_processed)):
+    positive_data[Y_processed[i][2]] += 1
 
 som = Kohonen.Kohonen(som_size, input_len, sigma, learning_rate)
+
 som.trainKohonen(data, numberOfEpochs)
+
+'''3
 score = som.quantization_error(data)
 print("The score")
-print(score)
+print(score)'''
+
+
+

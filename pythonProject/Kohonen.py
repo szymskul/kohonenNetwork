@@ -4,13 +4,28 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
+class Neuron():
+    def __init__(self, weights, classification):
+        self.weights = weights
+        self.classification = classification
+        self.classified = -1
 
+    def setClass(self, classification):
+        self.classification = classification
+
+    def getClass(self):
+        return self.classification
+
+    def chooseNeuronClass(self):
+        max_index = self.classification.index(max(self.classification))
+        self.classified = max_index
 class Kohonen():
 
     def __init__(self, som_size, input_len, sigma, learning_rate):
         self.input_len = input_len
         self.som = MiniSom(x=som_size[0], y=som_size[1], input_len=input_len, sigma=sigma, learning_rate=learning_rate)
         self.som_size = som_size
+        self.neurons = []
 
     def trainKohonen(self, data, numberOfEpochs):
         pca = PCA(n_components=2)
@@ -28,7 +43,7 @@ class Kohonen():
         reduced_weights = pca.transform(scaled_weights.reshape(-1, self.input_len))
 
         plt.scatter(reduced_weights[:, 0], reduced_weights[:, 1])
-        plt.title("Wizualizacja sieci Kohonena i instancji zbioru treningowego")
+        plt.title("Wizualizacja 2D sieci Kohonena i instancji zbioru treningowego")
         plt.show()
 
         self.som.train_random(data, numberOfEpochs)
@@ -43,10 +58,31 @@ class Kohonen():
 
         plt.show()
 
+    def classificationOfNeurons(self, data, targets):
+        bmu_list = []
+        for example in data:
+            bmu = self.som.winner(example)
+            if bmu not in bmu_list:
+                bmu_list.append(bmu)
+        list_of_neurons = [[0] * 21 for _ in range(len(bmu_list))]
+        for i in range(len(data)):
+            example = data[i]
+            target = targets[i]
+            bmu = self.som.winner(example)
+            bmu_index = bmu_list.index(bmu)
+            list_of_neurons[bmu_index][target[2]] += 1
+        for i in range(len(bmu_list)):
+            self.neurons.append(Neuron(bmu_list[i], list_of_neurons[i]))
+        for neuron in self.neurons:
+            neuron.chooseNeuronClass()
+
     def quantization_error(self, data):
         quantization_error = []
         for example in data:
             bmu = self.som.winner(example)
             quantization_error.append(np.linalg.norm(example - self.som.get_weights()[bmu[0], bmu[1]]))
         return np.mean(quantization_error)
+
+
+
 
