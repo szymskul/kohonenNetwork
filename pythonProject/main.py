@@ -48,10 +48,23 @@ som = Kohonen.Kohonen(som_size, input_len, sigma, learning_rate)
 
 som.trainKohonen(data, numberOfEpochs)
 
-'''3
+som.classificationOfNeurons(data, Y_processed)
+
+predicted = som.testKohonen(data)
+
+'''
 score = som.quantization_error(data)
 print("The score")
 print(score)'''
+correct = 0
+Y_target = []
+for process in Y_processed:
+    Y_target.append(process[2])
 
+for i in range(649):
+    if Y_target[i] == predicted[i]:
+        correct += 1
 
+correct = correct/649
 
+print(correct)

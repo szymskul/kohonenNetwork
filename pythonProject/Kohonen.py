@@ -10,12 +10,6 @@ class Neuron():
         self.classification = classification
         self.classified = -1
 
-    def setClass(self, classification):
-        self.classification = classification
-
-    def getClass(self):
-        return self.classification
-
     def chooseNeuronClass(self):
         max_index = self.classification.index(max(self.classification))
         self.classified = max_index
@@ -82,6 +76,44 @@ class Kohonen():
             bmu = self.som.winner(example)
             quantization_error.append(np.linalg.norm(example - self.som.get_weights()[bmu[0], bmu[1]]))
         return np.mean(quantization_error)
+
+    def testKohonen(self, data):
+        predicted = []
+        isPredicted = False
+        n = 2
+        data_target = -1
+        for example in data:
+            bmu = self.som.winner(example)
+            for neuron in self.neurons:
+                if neuron.weights == bmu:
+                    data_target = neuron.classified
+                    isPredicted = True
+                    break
+            while(isPredicted == False):
+                bmu = self.n_closest_neuron(data, n)
+                for neuron in self.neurons:
+                    if neuron.weights == bmu:
+                        data_target = neuron.classified
+                        isPredicted = True
+                        break
+                n = n + 1
+                print(n)
+            predicted.append(data_target)
+            isPredicted = False
+
+        return predicted
+
+    def n_closest_neuron(self, data, n):
+        weights = self.som.get_weights()
+        distances = np.linalg.norm(weights - data, axis=-1)
+        closest = []
+        for _ in range(n):
+            closest_idx = np.argmin(distances)
+            closest.append(np.unravel_index(closest_idx, distances.shape))
+            distances[closest[-1]] = np.inf
+
+        return closest[-1]
+
 
 
 
