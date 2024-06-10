@@ -90,14 +90,13 @@ class Kohonen():
                     isPredicted = True
                     break
             while(isPredicted == False):
-                bmu = self.n_closest_neuron(data, n)
+                bmu = self.n_closest_neuron(example, n)
                 for neuron in self.neurons:
                     if neuron.weights == bmu:
                         data_target = neuron.classified
                         isPredicted = True
                         break
                 n = n + 1
-                print(n)
             predicted.append(data_target)
             isPredicted = False
 
