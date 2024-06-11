@@ -13,6 +13,7 @@ class Neuron():
     def chooseNeuronClass(self):
         max_index = self.classification.index(max(self.classification))
         self.classified = max_index
+
 class Kohonen():
 
     def __init__(self, som_size, input_len, sigma, learning_rate):
@@ -27,14 +28,14 @@ class Kohonen():
 
         self.som.random_weights_init(data)
 
-        weights = self.som.get_weights().reshape(-1, self.input_len)
+        weights = self.som.get_weights().reshape(self.som_size[0] * self.som_size[1], self.input_len)
         scaler_weights = MinMaxScaler(feature_range=(-1, 1))
         scaled_weights = scaler_weights.fit_transform(weights).reshape(self.som_size[0], self.som_size[1], self.input_len)
         self.som.weights = scaled_weights
 
         plt.scatter(reduced_data[:, 0], reduced_data[:, 1])
 
-        reduced_weights = pca.transform(scaled_weights.reshape(-1, self.input_len))
+        reduced_weights = pca.transform(scaled_weights.reshape(self.som_size[0] * self.som_size[1], self.input_len))
 
         plt.scatter(reduced_weights[:, 0], reduced_weights[:, 1])
         plt.title("Wizualizacja 2D sieci Kohonena i instancji zbioru treningowego")
@@ -44,8 +45,8 @@ class Kohonen():
 
         plt.scatter(reduced_data[:, 0], reduced_data[:, 1])
 
-        weights_after = self.som.get_weights().reshape(-1, self.input_len)
-        reduced_weights_after = pca.transform(weights_after)
+        weights_after = self.som.get_weights()
+        reduced_weights_after = pca.transform(weights_after.reshape(self.som_size[0] * self.som_size[1], self.input_len))
 
         plt.scatter(reduced_weights_after[:, 0], reduced_weights_after[:, 1])
         plt.title("Wizualizacja 2D sieci Kohonena i instancji zbioru treningowego")
@@ -58,13 +59,13 @@ class Kohonen():
             bmu = self.som.winner(example)
             if bmu not in bmu_list:
                 bmu_list.append(bmu)
-        list_of_neurons = [[0] * 21 for _ in range(len(bmu_list))]
+        list_of_neurons = [[0] * 11 for _ in range(len(bmu_list))]
         for i in range(len(data)):
             example = data[i]
             target = targets[i]
             bmu = self.som.winner(example)
             bmu_index = bmu_list.index(bmu)
-            list_of_neurons[bmu_index][target[2]] += 1
+            list_of_neurons[bmu_index][target[0]] += 1
         for i in range(len(bmu_list)):
             self.neurons.append(Neuron(bmu_list[i], list_of_neurons[i]))
         for neuron in self.neurons:

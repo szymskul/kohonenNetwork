@@ -148,7 +148,6 @@ class MLP():
     def epoch(self, data_set, momentum, learning_rate, prev_weight, prev_bias, bias, stats=None):
         valid_error = 0
         correct_train_predictions = 0
-        print("epoch")
         for i, data in enumerate(data_set):
             result = self.forwardPropagation(data[0])
             if result.argmax() == np.array(data[1]).argmax():
@@ -170,8 +169,7 @@ class MLP():
         correct_test_predictions = 0
         predict_outputs = []
         real_outputs = []
-        print(test_set)
-        correct = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        correct = [0,0,0,0,0,0,0,0,0,0,0]
         for i, data in enumerate(test_set):
 
             count = self.forwardPropagation(data[0])
@@ -189,5 +187,5 @@ class MLP():
             ioFunctions.writeStats(fileName, f"Pożądany wzorzec {data[1]}")
             ioFunctions.writeStats(fileName, f"Bład wzorca {error}")
 
-        print("Całkowity procent poprawnie rozpoznanych przypadkow " + str(sum(correct) / (len(test_set)) * 100) + "%")
+        print("Całkowity procent poprawnie rozpoznanych przypadkow MLP " + str(sum(correct) / (len(test_set)) * 100) + "%")
 
