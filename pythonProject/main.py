@@ -15,6 +15,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 print("Co chcesz zrobic?")
 print("1. Klasyfikacja za pomoca sieci kohonena wraz z wlasnym klasyfikatorem")
 print("2. Redukcja wymiarow za pomoca sieci kohonena i klasyfikacja za pomoca implementacji MLP")
+print("3. Klasyfikacja MLP - jeden neuron na ostatniej powłoce")
 choose = int(input("Podaj wybór: "))
 if choose == 1:
 
@@ -154,3 +155,21 @@ elif choose == 2:
     print(f"Całkowity procent poprawnie rozpoznanych przypadków {correct}%")
     print(f"Calkowity procent srednio poprawnie rozpoznanych przypadkow {medium_level}%")
     print(f"Calkowity procent zle rozpoznanych przypadkow {100 - correct - medium_level}%")
+
+elif choose == 3:
+    wine = fetch_ucirepo(id=186)
+    X = wine.data.features
+    Y = wine.data.targets['quality'].values.ravel()
+
+    scaler = MinMaxScaler()
+    data_reshaped = Y.reshape(-1, 1)
+    Y_normalized = scaler.fit_transform(data_reshaped)
+    print(Y_normalized)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, Y_normalized, test_size=0.3, random_state=42)
+
+    mlp = MLPClassifier(hidden_layer_sizes=(10, 10, 10), max_iter=1000)
+    mlp.fit(X_train, y_train)
+    y_pred = mlp.predict(X_test)
+
+    print(y_pred)
