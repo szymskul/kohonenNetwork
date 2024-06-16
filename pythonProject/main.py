@@ -15,7 +15,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 print("Co chcesz zrobic?")
 print("1. Klasyfikacja za pomoca sieci kohonena wraz z wlasnym klasyfikatorem")
 print("2. Redukcja wymiarow za pomoca sieci kohonena i klasyfikacja za pomoca implementacji MLP")
-print("3. Klasyfikacja MLP - jeden neuron na ostatniej powłoce")
+print("3. Klasyfikacja MLP")
 choose = int(input("Podaj wybór: "))
 if choose == 1:
 
@@ -37,12 +37,9 @@ if choose == 1:
 
     X = scaler.fit_transform(X)
 
-    X_processed_kohonen_train = X[0:2000]
-    X_processed_kohonen_test = X[2000:2700]
-    Y_processed_kohonen_train = Y[0:2000]
-    Y_processed_kohonen_test = Y[2000:2700]
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=42)
 
-    som_size = (7, 7)
+    som_size = (10, 10)
     input_len = X.shape[1]
     learning_rate = 0.5
     sigma = 0.5
@@ -50,49 +47,49 @@ if choose == 1:
 
     som = Kohonen.Kohonen(som_size, input_len, sigma, learning_rate)
 
-    score = som.quantization_error(X_processed_kohonen_train)
+    score = som.quantization_error(X_train)
     print("Quantization before")
     print(score)
 
-    som.classificationOfNeurons(X_processed_kohonen_train, Y_processed_kohonen_train)
+    som.classificationOfNeurons(X_train, y_train)
 
-    predicted_before = som.testKohonen(X_processed_kohonen_test)
+    predicted_before = som.testKohonen(X_test)
 
     correct = 0
     medium_level = 0
     Y_target = []
 
-    for process in Y_processed_kohonen_test:
+    for process in y_test:
         Y_target.append(process[0])
-    for i in range(len(Y_processed_kohonen_test)):
+    for i in range(len(y_test)):
         if Y_target[i] == predicted_before[i]:
             correct += 1
         elif Y_target[i] == predicted_before[i] - 1 or Y_target[i] == predicted_before[i] + 1:
             medium_level += 1
 
-    medium_level = medium_level / len(Y_processed_kohonen_test) * 100
+    medium_level = medium_level / len(y_test) * 100
 
-    correct = correct/len(Y_processed_kohonen_test) * 100
+    correct = correct/len(y_test) * 100
     print(f"Całkowity procent poprawnie rozpoznanych przypadków {correct}%")
     print(f"Calkowity procent srednio poprawnie rozpoznanych przypadkow {medium_level}%")
     print(f"Calkowity procent zle rozpoznanych przypadkow {100 - correct - medium_level}%")
 
-    som.trainKohonen(X_processed_kohonen_train, numberOfEpochs)
+    som.trainKohonen(X_train, numberOfEpochs)
 
-    som.classificationOfNeurons(X_processed_kohonen_train, Y_processed_kohonen_train)
+    som.classificationOfNeurons(X_train, y_train)
 
-    predicted = som.testKohonen(X_processed_kohonen_test)
+    predicted = som.testKohonen(X_test)
 
-    score = som.quantization_error(X_processed_kohonen_train)
+    score = som.quantization_error(X_train)
     print("Quantization after")
     print(score)
     correct = 0
     medium_level = 0
     Y_target = []
 
-    for process in Y_processed_kohonen_test:
+    for process in y_test:
         Y_target.append(process[0])
-    for i in range(len(Y_processed_kohonen_test)):
+    for i in range(len(y_test)):
         if Y_target[i] == predicted[i]:
             correct += 1
         elif Y_target[i] == predicted[i] - 1 or Y_target[i] == predicted[i] + 1:
@@ -104,8 +101,8 @@ if choose == 1:
     print("Accuracy:", accuracy_score(Y_target, predicted))
     print(classification_report(Y_target, predicted, zero_division=1))
 
-    medium_level = medium_level / len(Y_processed_kohonen_test) * 100
-    correct = correct/len(Y_processed_kohonen_test) * 100
+    medium_level = medium_level / len(y_test) * 100
+    correct = correct/len(y_test) * 100
     print(f"Całkowity procent poprawnie rozpoznanych przypadków {correct}%")
     print(f"Calkowity procent srednio poprawnie rozpoznanych przypadkow {medium_level}%")
     print(f"Calkowity procent zle rozpoznanych przypadkow {100 - correct - medium_level}%")
@@ -161,15 +158,30 @@ elif choose == 3:
     X = wine.data.features
     Y = wine.data.targets['quality'].values.ravel()
 
-    scaler = MinMaxScaler()
-    data_reshaped = Y.reshape(-1, 1)
-    Y_normalized = scaler.fit_transform(data_reshaped)
-    print(Y_normalized)
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=42)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, Y_normalized, test_size=0.3, random_state=42)
-
-    mlp = MLPClassifier(hidden_layer_sizes=(10, 10, 10), max_iter=1000)
+    mlp = MLPClassifier(hidden_layer_sizes=(14, 15, 14), max_iter=1000)
     mlp.fit(X_train, y_train)
     y_pred = mlp.predict(X_test)
 
-    print(y_pred)
+    print("Matrix")
+    matrix = confusion_matrix(y_test, y_pred)
+    print(matrix)
+
+    print("Accuracy:", accuracy_score(y_test, y_pred))
+    print(classification_report(y_test, y_pred, zero_division=1))
+
+    correct = 0
+    medium_level = 0
+
+    for i in range(len(y_pred)):
+        if y_pred[i] == y_test[i]:
+            correct += 1
+        elif y_test[i] == y_pred[i] - 1 or y_test[i] == y_pred[i] + 1:
+            medium_level += 1
+
+    medium_level = medium_level / len(y_pred) * 100
+    correct = correct / len(y_pred) * 100
+    print(f"Całkowity procent poprawnie rozpoznanych przypadków {correct}%")
+    print(f"Calkowity procent srednio poprawnie rozpoznanych przypadkow {medium_level}%")
+    print(f"Calkowity procent zle rozpoznanych przypadkow {100 - correct - medium_level}%")
